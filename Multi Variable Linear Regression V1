@@ -1,0 +1,48 @@
+import pandas as pd
+import numpy as np 
+import matplotlib.pyplot as plt
+
+data=pd.read_csv("train.csv", usecols=["OverallQual","SalePrice"])
+data_df = pd.DataFrame(data)
+Inputs_df=data_df.ix[:, 0:data_df.shape[1]-1]
+Inputs_df["Quality2"]=data.OverallQual**2
+Inputs_df["Intercept"]=1
+Inputs=np.array(Inputs_df)
+Output_df=data_df.ix[:, data_df.shape[1]-1]
+Output=np.array(Output_df)
+Output = Output.flatten()
+
+def standardize(matrix):
+    average=np.mean(matrix)
+    deviation=np.std(matrix)
+    matrix=(matrix-average)/deviation
+    return matrix
+
+def gradientDescent(alpha, iterations):
+     weights=[1]*Inputs.shape[1]
+     for iteration in range(iterations):
+         
+         Hypothesis=np.dot(Inputs,weights)
+
+         loss=Hypothesis-Output
+
+         gradients=np.dot(Inputs.T, loss)/len(loss)
+
+         weights = weights - gradients * alpha
+
+     return weights, np.sum(loss)/len(loss)
+
+standard=standardize(Inputs.T[1]) 
+transposed = Inputs.T
+transposed[1] = standard
+Inputs = transposed.T 
+
+weights,loss=(gradientDescent(.01, 5000))
+predictions=np.dot(Inputs,weights)
+print(weights)
+print (loss)
+
+plt.plot(Inputs.T[0],predictions,"kx")
+plt.plot(Inputs.T[0],Output,"r.")
+plt.show()
+
